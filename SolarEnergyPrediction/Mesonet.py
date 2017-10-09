@@ -34,8 +34,7 @@ class WeatherData():
 
         # Solar power station info
         self.station_info = pd.read_csv("station_info.csv")
-        self.generated_energy = pd.read_csv("train.csv")
-        self.station_names = self.station_info.columns[1:]
+        self.station_names = self.station_info["stid"]
 
 
     def _check_index(self, lat, lon):
@@ -188,7 +187,7 @@ class WeatherData():
 
 
 class WeatherDataMT():
-    def __init__(self, data_loc="/homes/li108/Dataset/SolarEnergy"):
+    def __init__(self, data_loc="/home/hongshan/Dataset/SolarEnergy"):
         # Use a sample variable to initialize some attributes
         sample_var = os.listdir(data_loc)[0]
         sample_var = Dataset(os.path.join(data_loc, sample_var))
@@ -395,7 +394,7 @@ import time
 
 class OneVarInterp():
 
-    def __init__(self, data_loc="/homes/li108/Dataset/SolarEnergy", var_idx=0):
+    def __init__(self, data_loc, var_idx):
         var_name = os.listdir(data_loc)[var_idx]
         var_nc = Dataset(os.path.join(data_loc, var_name))
         self.time = var_nc.variables["time"]
@@ -456,7 +455,7 @@ class OneVarInterp():
         """
         Return: 
             Inpterpolated measurements for all location at one time
-            A numpy array of shape (98, 5)
+            A numpy array of shape (98,1,5)
         """
         d = self.data_on_meshgrid(time)
         x_coord = self.lon.__array__()
@@ -474,7 +473,66 @@ class OneVarInterp():
             all_stations.append(interpolated_var)
 
         return np.array(all_stations)
-            
+
+    def interp_all(self):
+        all_time = []
+        for i in range(len(self.time))[:10]:
+            all_time.append(self.interp_once(time=i))
+
+        return np.concatenate(all_time, axis=1)
+
+    def get_closest_data(self,time,station_name):
+        """
+        Arguments:
+            station_name: a solar power station 
+        Return: data of the closest weather station
+
+        This function is just to make sure the interpolation steps above
+        does what they suppose to do.
+        """
+        x_coord, y_coord = self.get_station_position(station_name=station_name)
+        x_res = [abs(x_coord - x) for x in self.lon.__array__()]
+        y_res = [abs(y_coord - x) for x in self.lat.__array__()]
+
+        lon_idx = x_res.index(min(x_res))
+        lat_idx = y_res.index(min(y_res))
+        
+        closest_data = self.feature[time,:,lat_idx, lon_idx]
+
+        
+        return closest_data
+
+"""
+Now, I want to interpolate different variables on different threads
+"""
+
+    
+from threading import Thread
+
+L = range(2)
+
+def interp_one_var(var_idx):
+    print("start interpolating")
+    data_loc = "/home/hongshan/Dataset/SolarEnergy"
+    a = OneVarInterp(data_loc=data_loc, var_idx=var_idx)
+    L[var_idx] = a.interp_all()
+    print("interpolation finished")
 
 
+def Main():
+    for i in range(2):
+        interp_one_var(var_idx=i)
 
+    b = np.concatenate(L, axis=2)
+
+    print(b)
+    print(b.shape)
+
+   
+        
+if __name__=="__main__":
+    Main()
+
+
+    
+    
