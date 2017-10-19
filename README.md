@@ -1,9 +1,6 @@
 # Wind-Solar
 
 
-
-
-
 ## Wind power prediction
 kaggle source: https://www.kaggle.com/c/GEF2012-wind-forecasting
 
