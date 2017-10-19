@@ -10,7 +10,7 @@ cd Wind-Solar/Wind/
 python main.py
 ```
 ### Data
-See `Win-Solar/Wind/data_explanation.md`.
+See [Win-Solar/Wind/data_explanation.md](Wind/data_explanation.md).
 
 ### Prediction method
 Neural network.

@@ -52,14 +52,14 @@ class Predictor(NeuralNetwork):
                 accumulated_error += self.current_error
             
             average_error = accumulated_error / num_batch
-            self.average_training_error.append(average_error)
-            print("Average error of epoch %d" % epoch)
-            print(average_error) 
+            average_RMSE = np.sqrt(average_error)
+            self.average_training_error.append(average_RMSE)
+            print("Average RMSE of epoch {0} : {1}".format(epoch, average_RMSE))
 
-        print("Performance on the test set")
         features = test[:,0:-1]
         ground_truth = test[:,-1].reshape(-1,1)
         self.forward(features)
         self.backward(ground_truth)
-        print(self.current_error)
+        print("Performance on the test set (RMSE): {0}".format(np.sqrt(self.current_error)))
+        
         

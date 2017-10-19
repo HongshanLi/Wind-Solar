@@ -111,7 +111,9 @@ class NeuralNetwork():
         # back-propogates dE/d(last_layer)
         if loss == "MSE":
             dE_dLast_layer = self.layers[-1] - target
-            self.current_error = np.abs(dE_dLast_layer.mean())
+            # self.current_error = np.abs(dE_dLast_layer.mean())
+            # set current error to be MSE
+            self.current_error = np.square(dE_dLast_layer).mean()
             dE_dLast_layer = dE_dLast_layer.mean(axis=0).reshape(1, -1)
             dE_dLast_layer = dE_dLast_layer.sum(axis=1).reshape(1, 1)
             dE_dLast_layer = np.concatenate([dE_dLast_layer]*self.shape[-1], axis=0)
